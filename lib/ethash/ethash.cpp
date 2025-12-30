@@ -17,6 +17,31 @@
 #include <limits>
 #include <iostream>
 
+#include <cstddef>
+#include <iomanip>
+#include <sstream>
+#include <cstdint>
+
+
+namespace {
+
+static inline std::string hexBytes(const uint8_t* p, size_t n)
+{
+    static const char* hexd = "0123456789abcdef";
+    std::string out;
+    out.resize(n * 2);
+    for (size_t i = 0; i < n; ++i)
+    {
+        const uint8_t b = p[i];
+        out[2 * i + 0] = hexd[b >> 4];
+        out[2 * i + 1] = hexd[b & 0x0F];
+    }
+    return out;
+}
+
+} // namespace
+
+
 namespace ethash
 {
 // Internal constants:
@@ -233,6 +258,8 @@ hash1024 calculate_dataset_item_1024(const epoch_context& context, uint32_t inde
     return hash1024{{item0.final(), item1.final()}};
 }
 
+
+
 hash2048 calculate_dataset_item_2048(const epoch_context& context, uint32_t index) noexcept
 {
     item_state item0{context, int64_t(index) * 4};
@@ -248,13 +275,18 @@ hash2048 calculate_dataset_item_2048(const epoch_context& context, uint32_t inde
         item3.update(j);
     }
 
-    std::cout
-        << "[DAG_CPU] epoch=210 index=0 item0_128="
-        << hexBytes(item0.final().bytes, 32)
-        << hexBytes(item1.final().bytes, 32)
-        << hexBytes(item2.final().bytes, 32)
-        << hexBytes(item3.final().bytes, 32)
-        << std::endl;
+    auto f0 = item0.final();
+    auto f1 = item1.final();
+    auto f2 = item2.final();
+    auto f3 = item3.final();
+
+    std::cout << "[DAG_CPU] index=" << index
+              << " item0_128="
+              << hexBytes(reinterpret_cast<const uint8_t*>(f0.bytes), 32)
+              << hexBytes(reinterpret_cast<const uint8_t*>(f1.bytes), 32)
+              << hexBytes(reinterpret_cast<const uint8_t*>(f2.bytes), 32)
+              << hexBytes(reinterpret_cast<const uint8_t*>(f3.bytes), 32)
+              << std::endl;
 
     return hash2048{{item0.final(), item1.final(), item2.final(), item3.final()}};
 }
