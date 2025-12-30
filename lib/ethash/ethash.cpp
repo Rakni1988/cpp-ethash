@@ -248,6 +248,14 @@ hash2048 calculate_dataset_item_2048(const epoch_context& context, uint32_t inde
         item3.update(j);
     }
 
+    std::cout
+        << "[DAG_CPU] epoch=210 index=0 item0_128="
+        << hexBytes(item0.final().bytes, 32)
+        << hexBytes(item1.final().bytes, 32)
+        << hexBytes(item2.final().bytes, 32)
+        << hexBytes(item3.final().bytes, 32)
+        << std::endl;
+
     return hash2048{{item0.final(), item1.final(), item2.final(), item3.final()}};
 }
 
